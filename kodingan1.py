@@ -13,14 +13,24 @@ def baca_data():
         return list(csv.DictReader(f))
 
 def validasi_data(data):
-    for no, row in enumerate(data, start=1):
-        for k in kolom:
-            if not row[k].strip():
-                print("Baris", no, "kolom", k, "kosong.")
-                return False
+    jumlah_valid = 0
+    jumlah_tidak_valid = 0
 
-    print("Data Valid.")
-    return True
+    for row in data:
+        lengkap = True
+
+        for k in kolom:
+            if not (row.get(k) or "").strip():
+                lengkap = False
+
+        if lengkap:
+            jumlah_valid += 1
+        else:
+            jumlah_tidak_valid += 1
+
+    print ("jumlah data valid :", jumlah_valid)
+    print ("jumlah data tidak valid :", jumlah_tidak_valid)
+
 
 def simpan_data(data):
     with open(nama_file, "w", newline="", encoding="utf-8-sig") as f:
@@ -75,6 +85,8 @@ def tampilkan(data):
     while i < len(data):
         tabel(data[i:i + 20])
         i += 20
+        validasi_data(data)
+
 
 def tambah(data):
     baru = {}
@@ -287,7 +299,6 @@ def urutkan(data):
     tampilkan(hasil)
 
 data = baca_data()
-validasi_data(data)
 while True:
 
     print("\n===== MENU PENGIRIMAN =====")
