@@ -1,6 +1,6 @@
 import csv
 
-file = "package_delivery_data.csv"
+nama_file = "package_delivery_data.csv"
 
 kolom = [
     "distance_km", "package_weight_kg", "traffic_level",
@@ -9,61 +9,65 @@ kolom = [
 ]
 
 def baca_data():
-    with open(file, "r", newline="", encoding="utf-8-sig") as f:
+    with open(nama_file, "r", newline="", encoding="utf-8-sig") as f:
         return list(csv.DictReader(f))
 
-def simpan_data(data):
-    with open(file, "w", newline="", encoding="utf-8") as f:
-        writer = csv.DictWriter(f, fieldnames=kolom)
-        writer.writeheader()
-        writer.writerows(data)
+def validasi_data(data):
+    for no, row in enumerate(data, start=1):
+        for k in kolom:
+            if not row[k].strip():
+                print("Baris", no, "kolom", k, "kosong.")
+                return False
 
+    print("Data Valid.")
+    return True
+
+def simpan_data(data):
+    with open(nama_file, "w", newline="", encoding="utf-8-sig") as f:
+        w = csv.DictWriter(f, fieldnames=kolom)
+        w.writeheader()
+        w.writerows(data)
 
 def tabel(data):
     print("-" * 117)
-
-    print(f"{'No':<3} | {'Jarak':<10} | {'Berat':<10} | {'Traffic':<10} | {'Cuaca':<8} | {'Kendaraan':<10} | {'Delay':<9} | {'Handling':<10} | {'Prioritas':<10} | {'Waktu':<10}")
-
+    print(f"| {'No':<2} | {'Jarak':<6} | {'Berat':<6} | {'Traffic':<7} | {'Cuaca':<6} | {'Kendaraan':<6} | {'Delay':<6} | {'Handling':<6} | {'Prioritas':<6} | {'Waktu':<5} |" )
     print("-" * 117)
 
     no = 1
-
     for row in data:
-        print(f"{no:<3} | {row['distance_km']:<10} | {row['package_weight_kg']:<10} | {row['traffic_level']:<10} | {row['weather']:<8} | {row['vehicle_type']:<10} | {row['warehouse_delay_hours']:<9} | {row['handling_time_hours']:<10} | {row['priority']:<10} | {row['delivery_time_hours']:<10}")
-
+        print(f"| {no:<2} | {row['distance_km']:<6} | {row['package_weight_kg']:<6} | {row['traffic_level']:<7} | {row['weather']:<6} | {row['vehicle_type']:<9} | {row['warehouse_delay_hours']:<6} | {row['handling_time_hours']:<8} | {row['priority']:<8} | {row['delivery_time_hours']:<5} |")
         no += 1
+    print("-" * 121)
 
-    print("-" * 117)
+def estimasi():
+    while True:
+        distance = float(input("Masukkan jarak pengiriman (km): "))
+        if distance > 0:
+            break
+        print("Jarak harus lebih besar dari 0 ")
+        print("harap input kembali")
 
-def estimasi(data):
-    jarak = float(input("Masukkan jarak: "))
-    berat = float(input("Masukkan berat: "))
-    cuaca = input("Masukkan cuaca (Clear/Rain/Storm): ").title()
 
-    hasil = []
+    while True:
+        weight = float(input("Masukkan berat paket (kg): "))
+        if weight > 0:
+            break
+        print("Berat harus lebih besar dari 0. Masukkan ulang.")
 
-    for row in data:
-        if row["weather"] == cuaca and abs(float(row["distance_km"]) - jarak) <= 10:
-            hasil.append(row)
+    while True:
+        weather = input("Masukkan cuaca (Clear/Storm/Rain): ").strip().lower()
+        if weather in ["clear", "storm", "rain"]:
+            break
+        print("Pilihan cuaca tidak tersedia. Masukkan ulang.")
 
-    if len(hasil) == 0:
-        print("Data dengan jarak dan cuaca yang sesuai tidak ditemukan.")
-        return
+    waktu = 8.126 + (0.111 * distance) + (0.069 * weight)
 
-    total_waktu = 0
-    total_berat = 0
+    if weather == "rain":
+        waktu += 3.972
+    elif weather == "storm":
+        waktu += 5.693
 
-    for row in hasil:
-        total_waktu += float(row["delivery_time_hours"])
-        total_berat += float(row["package_weight_kg"])
-
-    rata_waktu = total_waktu / len(hasil)
-    rata_berat = total_berat / len(hasil)
-
-    waktu = rata_waktu + (berat - rata_berat) * 0.03
-
-    print("Jumlah data pembanding:", len(hasil))
-    print("Estimasi waktu:", round(waktu, 2), "jam")
+    print("Estimasi waktu :", round(waktu, 2), "jam")
 
 def tampilkan(data):
     i = 0
@@ -71,89 +75,171 @@ def tampilkan(data):
     while i < len(data):
         tabel(data[i:i + 20])
         i += 20
-        
-        break
 
 def tambah(data):
     baru = {}
 
-    for nama in kolom:
-        baru[nama] = input("Masukkan " + nama + ": ")
+    for k in kolom:
+
+        if k in ["distance_km", "package_weight_kg",
+                 "warehouse_delay_hours", "handling_time_hours",
+                 "delivery_time_hours"]:
+
+            while True:
+                nilai = float(input("Masukkan " + k + " : "))
+                if nilai > 0:
+                    baru[k] = str(nilai)
+                    break
+                print("Angka harus lebih besar dari 0. Masukkan ulang.")
+
+        elif k == "traffic_level":
+            while True:
+                nilai = input("Masukkan traffic level (low/medium/high): ").strip().lower()
+                if nilai in ["low", "medium", "high"]:
+                    baru[k] = nilai
+                    break
+                print("Traffic level tidak tersedia. Masukkan ulang.")
+
+        elif k == "weather":
+            while True:
+                nilai = input("Masukkan weather (clear/storm/rain): ").strip().lower()
+                if nilai in ["clear", "storm", "rain"]:
+                    baru[k] = nilai
+                    break
+                print("Weather tidak tersedia. Masukkan ulang.")
+
+        elif k == "vehicle_type":
+            while True:
+                nilai = input("Masukkan vehicle type (bike/van/truck): ").strip().lower()
+                if nilai in ["bike", "van", "truck"]:
+                    baru[k] = nilai
+                    break
+                print("Vehicle type tidak tersedia. Masukkan ulang.")
+
+        elif k == "priority":
+            while True:
+                nilai = input("Masukkan priority (express/standard): ").strip().lower()
+                if nilai in ["express", "standard"]:
+                    baru[k] = nilai
+                    break
+                print("Priority tidak tersedia. Masukkan ulang.")
 
     data.append(baru)
     simpan_data(data)
-
     print("Data berhasil ditambahkan.")
 
 def ubah(data):
-    no = int(input("Masukkan nomor data: "))
+    while True:
+        no = int(input("Masukkan nomor data: "))
+        if 1 <= no <= len(data):
+            break
+        print("Nomor data tidak ditemukan.")
 
-    if no >= 1 and no <= len(data):
+    tabel([data[no - 1]])
+
+    print("Kolom yang tersedia:")
+
+    for nama in kolom:
+        print(nama)
+
+    nama = input("Kolom yang ingin diubah: ").strip()
+
+    if nama in kolom:
+
+        if nama in ["distance_km", "package_weight_kg",
+                    "warehouse_delay_hours", "handling_time_hours",
+                    "delivery_time_hours"]:
+
+            while True:
+                nilai = float(input("Masukkan nilai baru: "))
+                if nilai > 0:
+                    break
+                print("Angka harus lebih besar dari 0. Masukkan ulang.")
+
+        elif nama == "traffic_level":
+            while True:
+                nilai = input("Masukkan traffic level: ").strip().lower()
+                if nilai in ["low", "medium", "high"]:
+                    break
+                print("Pilihan tidak tersedia. Masukkan ulang.")
+
+        elif nama == "weather":
+            while True:
+                nilai = input("Masukkan weather: ").strip().lower()
+                if nilai in ["clear", "storm", "rain"]:
+                    break
+                print("Pilihan tidak tersedia. Masukkan ulang.")
+
+        elif nama == "vehicle_type":
+            while True:
+                nilai = input("Masukkan vehicle type: ").strip().lower()
+                if nilai in ["bike", "van", "truck"]:
+                    break
+                print("Pilihan tidak tersedia. Masukkan ulang.")
+
+        elif nama == "priority":
+            while True:
+                nilai = input("Masukkan priority: ").strip().lower()
+                if nilai in ["express", "standard"]:
+                    break
+                print("Pilihan tidak tersedia. Masukkan ulang.")
+
+        data[no - 1][nama] = str(nilai)
+        simpan_data(data)
+
+        print("Data berhasil diubah.")
         tabel([data[no - 1]])
 
-        print("Kolom yang tersedia:")
-
-        for nama in kolom:
-            print(nama)
-
-        nama = input("Kolom yang ingin diubah: ")
-
-        if nama in kolom:
-            nilai = input("Masukkan nilai baru: ")
-
-            data[no - 1][nama] = nilai
-            simpan_data(data)
-
-            print("Data berhasil diubah.")
-            tabel([data[no - 1]])
-        else:
-            print("Kolom tidak ditemukan.")
     else:
-        print("Nomor data tidak ditemukan.")
+        print("Kolom tidak ditemukan.")
 
 def hapus(data):
-    no = int(input("Masukkan nomor data: "))
-
-    if no >= 1 and no <= len(data):
-        tabel([data[no - 1]])
-
-        pilih = input("Yakin hapus data? (y/n): ")
-
-        if pilih == "y":
-            data.pop(no - 1)
-            simpan_data(data)
-            print("Data berhasil dihapus.")
-        else:
-            print("Penghapusan dibatalkan.")
-    else:
+    while True:
+        no = int(input("Masukkan nomor data: "))
+        if 1 <= no <= len(data):
+            break
         print("Nomor data tidak ditemukan.")
+
+    tabel([data[no - 1]])
+
+    pilih = input("Yakin hapus data? (y/n): ").strip().lower()
+
+    if pilih == "y":
+        data.pop(no - 1)
+        simpan_data(data)
+        print("Data berhasil dihapus.")
+    else:
+        print("Penghapusan dibatalkan.")
 
 def cari(data):
     print("1. Berdasarkan jarak")
     print("2. Berdasarkan berat")
 
-    pilih = input("Pilih: ")
+    pilih = input("Pilih 1/2: ").strip()
 
     if pilih == "1":
-        nama = "distance_km"
+        k = "distance_km"
     elif pilih == "2":
-        nama = "package_weight_kg"
+        k = "package_weight_kg"
     else:
         print("Pilihan tidak tersedia.")
         return
 
-    minimum = float(input("Nilai minimum: "))
-    maksimum = float(input("Nilai maksimum: "))
+    while True:
+        batas_min = float(input("Nilai minimum: "))
+        if batas_min > 0:
+            break
+        print("Angka harus lebih besar dari 0. Masukkan ulang.")
 
-    hasil = []
+    while True:
+        batas_max = float(input("Nilai maksimum: "))
+        if batas_max >= batas_min:
+            break
+        print("Nilai maksimum tidak boleh lebih kecil dari minimum.")
 
-    for row in data:
-        nilai = float(row[nama])
+    hasil = [d for d in data if batas_min <= float(d[k]) <= batas_max]
 
-        if nilai >= minimum and nilai <= maksimum:
-            hasil.append(row)
-
-    if len(hasil) > 0:
+    if hasil:
         tabel(hasil)
         print("Jumlah data:", len(hasil))
     else:
@@ -162,43 +248,28 @@ def cari(data):
 def statistik(data):
     print("Jumlah data:", len(data))
 
-    if len(data) == 0:
+    if not data:
         return
 
-    daftar = ["distance_km", "package_weight_kg",
-              "delivery_time_hours"]
+    for k in ["distance_km", "package_weight_kg", "delivery_time_hours"]:
+        nilai = [float(d[k]) for d in data]
 
-    for nama in daftar:
-        total = 0
-        minimum = float(data[0][nama])
-        maksimum = float(data[0][nama])
-
-        for row in data:
-            nilai = float(row[nama])
-
-            total += nilai
-
-            if nilai < minimum:
-                minimum = nilai
-
-            if nilai > maksimum:
-                maksimum = nilai
-
-        print("\n", nama)
-        print("Rata-rata:", round(total / len(data), 2))
-        print("Minimum:", minimum)
-        print("Maksimum:", maksimum)
+        print("\n" + k)
+        print("Rata-rata:", round(sum(nilai) / len(nilai), 2))
+        print("Minimum:", min(nilai))
+        print("Maksimum:", max(nilai))
 
 def filter_cuaca(data):
-    cuaca = input("Masukkan cuaca (Clear/Rain/Storm): ").title()
+    while True:
+        cuaca = input("Masukkan cuaca (Clear/Rain/Storm): ").strip().lower()
 
-    hasil = []
+        if cuaca in ["clear", "rain", "storm"]:
+            break
+        print("Pilihan cuaca tidak tersedia. Masukkan ulang.")
 
-    for row in data:
-        if row["weather"] == cuaca:
-            hasil.append(row)
+    hasil = [d for d in data if d["weather"].lower() == cuaca]
 
-    if len(hasil) > 0:
+    if hasil:
         tabel(hasil)
         print("Jumlah data:", len(hasil))
     else:
@@ -243,8 +314,9 @@ def urutkan(data):
     tampilkan(hasil)
 
 data = baca_data()
-
+validasi_data(data)
 while True:
+
     print("\n===== MENU PENGIRIMAN =====")
     print("1. Estimasi Waktu Pengiriman")
     print("2. Tampilkan Data Pengiriman")
@@ -257,10 +329,10 @@ while True:
     print("9. Urutkan Data Pengiriman")
     print("10. Keluar")
 
-    menu = input("Pilih menu: ")
+    menu = input("Pilih menu: ").strip()
 
     if menu == "1":
-        estimasi(data)
+        estimasi()
     elif menu == "2":
         tampilkan(data)
     elif menu == "3":
