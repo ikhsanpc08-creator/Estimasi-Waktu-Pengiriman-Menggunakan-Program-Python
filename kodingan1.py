@@ -39,15 +39,15 @@ def simpan_data(data):
         w.writerows(data)
 
 def tabel(data):
-    print("-" * 117)
+    print("-" * 95)
     print(f"| {'No':<2} | {'Jarak':<6} | {'Berat':<6} | {'Traffic':<7} | {'Cuaca':<6} | {'Kendaraan':<6} | {'Delay':<6} | {'Handling':<6} | {'Prioritas':<6} | {'Waktu':<5} |" )
-    print("-" * 117)
+    print("-" * 95)
 
     no = 1
     for row in data:
-        print(f"| {no:<2} | {row['distance_km']:<6} | {row['package_weight_kg']:<6} | {row['traffic_level']:<7} | {row['weather']:<6} | {row['vehicle_type']:<9} | {row['warehouse_delay_hours']:<6} | {row['handling_time_hours']:<8} | {row['priority']:<8} | {row['delivery_time_hours']:<5} |")
+        print(f"| {no:<2} | {row['distance_km']:<6} | {row['package_weight_kg']:<6} | {row['traffic_level']:<7} | {row['weather']:<6} | {row['vehicle_type']:<9} | {row['warehouse_delay_hours']:<6} | {row['handling_time_hours']:<8} | {row['priority']:<9} | {row['delivery_time_hours']:<5} |")
         no += 1
-    print("-" * 121)
+    print("-" * 95)
 
 def estimasi():
     while True:
@@ -80,12 +80,8 @@ def estimasi():
     print("Estimasi waktu :", round(waktu, 2), "jam")
 
 def tampilkan(data):
-    i = 0
-
-    while i < len(data):
-        tabel(data[i:i + 20])
-        i += 20
-        validasi_data(data)
+    tabel(data)
+    validasi_data(data)
 
 
 def tambah(data):
