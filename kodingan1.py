@@ -202,48 +202,21 @@ def hapus(data):
 
     tabel([data[no - 1]])
 
-    pilih = input("Yakin hapus data? (y/n): ").strip().lower()
+    while True :
+        pilih = input("Yakin hapus data? (y/n): ").strip().lower()
 
-    if pilih == "y":
-        data.pop(no - 1)
-        simpan_data(data)
-        print("Data berhasil dihapus.")
-    else:
-        print("Penghapusan dibatalkan.")
-
-def cari(data):
-    print("1. Berdasarkan jarak")
-    print("2. Berdasarkan berat")
-
-    pilih = input("Pilih 1/2: ").strip()
-
-    if pilih == "1":
-        k = "distance_km"
-    elif pilih == "2":
-        k = "package_weight_kg"
-    else:
-        print("Pilihan tidak tersedia.")
-        return
-
-    while True:
-        batas_min = float(input("Nilai minimum: "))
-        if batas_min > 0:
+        if pilih == "y":
+            data.pop(no - 1)
+            simpan_data(data)
+            print("Data berhasil dihapus.")
             break
-        print("Angka harus lebih besar dari 0. Masukkan ulang.")
-
-    while True:
-        batas_max = float(input("Nilai maksimum: "))
-        if batas_max >= batas_min:
+        elif pilih == "n" :
+            print("Penghapusan dibatalkan.")
             break
-        print("Nilai maksimum tidak boleh lebih kecil dari minimum.")
-
-    hasil = [d for d in data if batas_min <= float(d[k]) <= batas_max]
-
-    if hasil:
-        tabel(hasil)
-        print("Jumlah data:", len(hasil))
-    else:
-        print("Data tidak ditemukan.")
+        else:
+            print("Penghapusan dibatalkan.")
+            print("piliha (y) jika ingin menghapus data")
+            print("piliha (n) jika batal menghapus data")
 
 def statistik(data):
     print("Jumlah data:", len(data))
@@ -323,11 +296,11 @@ while True:
     print("3. Tambah Data Pengiriman")
     print("4. Ubah Data Pengiriman")
     print("5. Hapus Data Pengiriman")
-    print("6. Cari Data Pengiriman")
-    print("7. Statistik Pengiriman")
-    print("8. Filter Berdasarkan Cuaca")
-    print("9. Urutkan Data Pengiriman")
-    print("10. Keluar")
+    print("6. Statistik pengiriman")
+    print("7. Filter berdasarkan cuaca")
+    print("8. Urutkan data pengiriman")
+    print("9. Keluar")
+   
 
     menu = input("Pilih menu: ").strip()
 
@@ -342,14 +315,12 @@ while True:
     elif menu == "5":
         hapus(data)
     elif menu == "6":
-        cari(data)
-    elif menu == "7":
         statistik(data)
+    elif menu == "7":
+         filter_cuaca(data)
     elif menu == "8":
-        filter_cuaca(data)
-    elif menu == "9":
         urutkan(data)
-    elif menu == "10":
+    elif menu == "9":
         print("Terima kasih telah menggunakan program!")
         break
     else:
